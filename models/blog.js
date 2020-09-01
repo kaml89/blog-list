@@ -6,7 +6,8 @@ const blogSchema = Schema({
   user: { type: Schema.Types.ObjectID, ref: 'User' },
   author: String,
   url: {type: String, required: true},
-  likes: { type: Number, default: 0 } 
+  likes: { type: Number, default: 0 },
+  comments: { type: [String], required: true }
 
 })
 

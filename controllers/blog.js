@@ -55,14 +55,10 @@ blogRouter.put('/:id', async (request, response, next) => {
       return response.status(401).json({error: 'missing or invalid token'})
     }
   
-    const { url, author, title, user, likes } = request.body
+    //const { url, author, title, user, likes, comments } = request.body
     
     const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, {
-      title,
-      author,
-      url,
-      user: user.id,
-      likes
+      $inc: { likes: 1 }
     }, { new: true })
     console.log(updatedBlog)
     response.json(updatedBlog.toJSON())
@@ -78,6 +74,25 @@ blogRouter.get('/:id/comments', async (request, response, next) => {
     console.log(blog.comments)
     response.json(blog.comments)
   } catch(error) {
+    next(error)
+  }
+})
+
+blogRouter.put('/:id/comments', async (request, response, next) => {
+  try {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    if (!request.token || !decodedToken.id) {
+      return response.status(401).json({error: 'missing or invalid token'})
+    }
+    const blog = await Blog.findById(request.params.id)
+    console.log(blog.comments)
+    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, {
+      $push: { comments: request.body.data }
+    }, { new: true })
+    const { data } = request.body
+    
+    response.json(updatedBlog.toJSON())
+    } catch(error) {
     next(error)
   }
 })

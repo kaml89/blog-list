@@ -1,10 +1,9 @@
-const loginRouter = require('express').Router()
+const authRouter = require('express').Router()
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
-const Blog = require('../models/blog')
 const bcrypt = require('bcrypt')
 
-loginRouter.post('/', async (request, response) => {
+authRouter.post('/login', async (request, response) => {
   const { username, password } = request.body
   console.log(username)
   const user = await User.findOne({username})
@@ -29,4 +28,25 @@ loginRouter.post('/', async (request, response) => {
 
 })
 
-module.exports = loginRouter
+authRouter.post('/register', async (request, response, next) => {
+  try {
+    const { username, name, password } = request.body
+
+    const user = new User({
+      username,
+      name,
+      passwordHash: password
+    })
+
+    const newUser = await user.save()
+    
+    response
+      .status(201)
+      .json( newUser.toJSON())
+
+  } catch(error) {
+    next(error)
+  }
+}) 
+
+module.exports = authRouter

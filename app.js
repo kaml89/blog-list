@@ -7,7 +7,7 @@ const mongoose = require('mongoose')
 const middleware = require('./utils/middleware')
 const blogRouter = require('./controllers/blog')
 const userRouter = require('./controllers/user')
-const loginRouter = require('./controllers/login')
+const authRouter = require('./controllers/login')
 const logger = require('./utils/logger')
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -25,7 +25,7 @@ app.use(middleware.tokenExtractor)
 
 app.use('/api/blogs', blogRouter)
 app.use('/api/users', userRouter)
-app.use('/api/login', loginRouter)
+app.use('/api/auth', authRouter)
 
 app.use(middleware.errorHandler)
 

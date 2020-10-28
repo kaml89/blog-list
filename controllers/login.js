@@ -30,9 +30,10 @@ authRouter.post('/login', async (request, response) => {
 
 authRouter.post('/register', async (request, response, next) => {
   try {
-    const { username, name, password } = request.body
+    const { email, username, name, password } = request.body
 
     const user = new User({
+      email,
       username,
       name,
       passwordHash: password

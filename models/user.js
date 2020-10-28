@@ -4,6 +4,7 @@ const Schema = mongoose.Schema
 const bcrypt = require('bcrypt')
 
 const userSchema = Schema({
+  email: { type: String, unique: true, required: true },
   username: { type: String, unique: true, required: true },
   passwordHash: { type: String, required: true },
   name: String,

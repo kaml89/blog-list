@@ -1,8 +1,7 @@
 const blogRouter = require('express').Router()
 const jwt = require('jsonwebtoken')
-const User = require('../models/user')
-const Blog = require('../models/blog')
 const BlogService = require('../services/blog.js')
+const UserService = require('../services/user.js')
 const createResponseObject = require('../utils/createResponseObject')
 
 blogRouter.get('/', async (request, response, next) => {
@@ -20,7 +19,7 @@ blogRouter.post('/', async (request, response, next) => {
       return response.status(401).json({error: 'missing or invalid token'})
     }
     const { title, author, url } = request.body
-    const user = await User.findById(decodedToken.id)
+    const user = await UserService.getUserById(decodedtoken.id)
 
     const newBlog = await BlogService.create({
       title,
@@ -33,8 +32,9 @@ blogRouter.post('/', async (request, response, next) => {
       ...user.toJSON(),
       blogs: [ ...user.blogs, newBlog.id]
     }
-    await User.findByIdAndUpdate(user._id, updatedUser)
-    
+
+    await UserService.update(user._id, updatedUser)
+
     const responseObject = {
       ...newBlog.toJSON(),
       user: updatedUser
@@ -91,8 +91,8 @@ blogRouter.delete('/:id', async (request, response, next) => {
   try {
 
     const decodedToken = jwt.verify(request.token, process.env.SECRET)
-    const user = await User.findById(decodedToken.id)
-    const blog = await Blog.findById(request.params.id)
+    const user = await UserService.getUserById(decodedToken.id)
+    const blog = await BlogService.getBlogById(request.params.id)
     
 
     if(!request.token || !decodedToken.id || blog.user.toString() !== decodedToken.id) {
@@ -105,7 +105,7 @@ blogRouter.delete('/:id', async (request, response, next) => {
     }
 
     const deletedBlog = await BlogService.delete(request.params.id)
-    await User.findByIdAndUpdate(decodedToken.id, updatedUser)
+    await UserService.update(decodedToken.id, updatedUser)
 
     response.json(deletedBlog.toJSON())
 

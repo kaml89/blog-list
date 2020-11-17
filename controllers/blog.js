@@ -1,16 +1,14 @@
 const blogRouter = require('express').Router()
-const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const Blog = require('../models/blog')
+const BlogService = require('../services/blog.js')
 const createResponseObject = require('../utils/createResponseObject')
 
 blogRouter.get('/', async (request, response, next) => {
-  const blogs = await Blog
-    .find({})
-    .populate('user', { name: 1, username: 1, blogs: 1, id: 1 })
+  const blogs = BlogService.getAllBlogs()
 
-  response.json(createResponseObject(blogs.map(blog => blog.toJSON())))
+  response.json(blogs.map(blog => blog.toJSON()))
   next()
 })
 
@@ -24,25 +22,23 @@ blogRouter.post('/', async (request, response, next) => {
     const { title, author, url } = request.body
     const user = await User.findById(decodedToken.id)
 
-    const newBlog = new Blog({
+    const newBlog = await BlogService.create({
       title,
       author,
       url,
       user: user._id
     })
 
-    const savedBlog = await newBlog.save()
-    
     const updatedUser = {
       ...user.toJSON(),
-      blogs: [ ...user.blogs, savedBlog.id]
+      blogs: [ ...user.blogs, newBlog.id]
     }
     await User.findByIdAndUpdate(user._id, updatedUser)
     
-    const responseObject = createResponseObject({
-      ...savedBlog.toJSON(),
+    const responseObject = {
+      ...newBlog.toJSON(),
       user: updatedUser
-    })
+    }
 
     response.json(responseObject)
   
@@ -58,9 +54,7 @@ blogRouter.put('/:id', async (request, response, next) => {
       return response.status(401).json({error: 'missing or invalid token'})
     }
     
-    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, {
-      $inc: { likes: 1 }
-    }, { new: true })
+    const updatedBlog = await BlogService.incrementLikes(request.params.id)
     
     response.json(updatedBlog.toJSON())
     
@@ -71,7 +65,7 @@ blogRouter.put('/:id', async (request, response, next) => {
 
 blogRouter.get('/:id/comments', async (request, response, next) => {
   try {
-    const blog = await Blog.findById(request.params.id)
+    const blog = await BlogService.getBlogById(request.params.id)
     response.json(blog.comments)
   } catch(error) {
     next(error)
@@ -85,9 +79,7 @@ blogRouter.put('/:id/comments', async (request, response, next) => {
       return response.status(401).json({error: 'missing or invalid token'})
     }
     
-    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, {
-      $push: { comments: request.body.data }
-    }, { new: true })
+    const updatedBlog = await BlogService.addComment(request.params.id, request.body.data)
     response.json(updatedBlog.toJSON())
 
     } catch(error) {
@@ -112,7 +104,7 @@ blogRouter.delete('/:id', async (request, response, next) => {
       blogs: user.blogs.filter(item => item.toString() !== blog.id)
     }
 
-    const deletedBlog = await Blog.findByIdAndDelete(request.params.id)
+    const deletedBlog = await BlogService.delete(request.params.id)
     await User.findByIdAndUpdate(decodedToken.id, updatedUser)
 
     response.json(deletedBlog.toJSON())

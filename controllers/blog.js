@@ -3,13 +3,15 @@ const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const Blog = require('../models/blog')
+const createResponseObject = require('../utils/createResponseObject')
 
 blogRouter.get('/', async (request, response, next) => {
   const blogs = await Blog
     .find({})
     .populate('user', { name: 1, username: 1, blogs: 1, id: 1 })
 
-  response.json(blogs.map(blog => blog.toJSON()))
+  response.json(createResponseObject(blogs.map(blog => blog.toJSON())))
+  next()
 })
 
 blogRouter.post('/', async (request, response, next) => {
@@ -37,11 +39,12 @@ blogRouter.post('/', async (request, response, next) => {
     }
     await User.findByIdAndUpdate(user._id, updatedUser)
     
-    //response.json(savedBlog.toJSON())
-    response.json({
+    const responseObject = createResponseObject({
       ...savedBlog.toJSON(),
       user: updatedUser
     })
+
+    response.json(responseObject)
   
   } catch(error) {
     next(error)

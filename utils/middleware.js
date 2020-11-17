@@ -17,7 +17,7 @@ const errorHandler = (err, req, res, next) => {
 
   else if (err.name === "ValidationError") {
     res.status(400).json({
-      error: err.message
+      error: err
     })
   }
   next(err)
@@ -30,6 +30,7 @@ const tokenExtractor = (req, res, next) => {
   }
   next()
 }
+
 
 module.exports = {
   requestLogger, errorHandler, tokenExtractor

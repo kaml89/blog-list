@@ -12,6 +12,11 @@ module.exports = {
         const user = await User.findById(id)
         return user
     },
+
+    findByUsername: async (username) => {
+        const user = await User.findOne({username})
+        return user
+    },
     
     create: async (user) => {
         const newUser = new User(user)

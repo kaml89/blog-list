@@ -1,13 +1,15 @@
 const authRouter = require('express').Router()
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
+const UserService = require('../services/user')
 const bcrypt = require('bcrypt')
 const createResponseObject = require('../utils/createResponseObject')
 
 authRouter.post('/login', async (request, response) => {
   const { username, password } = request.body
   console.log(username)
-  const user = await User.findOne({username})
+  
+  const user = await UserService.findByUsername(username)
 
   const passwordCorrect = user === null ? false : await bcrypt.compare(password, user.passwordHash)
   if (!(user && passwordCorrect)) {
@@ -35,16 +37,16 @@ authRouter.post('/login', async (request, response) => {
 authRouter.post('/register', async (request, response, next) => {
   try {
     const { email, username, name, password } = request.body
-
-    const user = new User({
+    
+    const user = {
       email,
       username,
       name,
       passwordHash: password
-    })
+    }
 
-    const newUser = await user.save()
-    
+    const newUser = await UserService.create(user)
+
     response
       .status(201)
       .json( newUser.toJSON())

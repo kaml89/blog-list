@@ -6,7 +6,7 @@ const createResponseObject = require('../utils/createResponseObject')
 module.exports = {
   getAllBlogs: async (request, response, next) => {
     const blogs = await BlogService.getAllBlogs()
-    console.log(blogs)
+    //console.log(blogs)
     response.json(blogs.map(blog => blog.toJSON()))
     next()  
   },

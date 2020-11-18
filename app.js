@@ -7,7 +7,7 @@ const mongoose = require('mongoose')
 const middleware = require('./utils/middleware')
 const blogRouter = require('./routes/blog')
 const userRouter = require('./controllers/user')
-const authRouter = require('./controllers/login')
+const authRouter = require('./routes/auth')
 const logger = require('./utils/logger')
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })

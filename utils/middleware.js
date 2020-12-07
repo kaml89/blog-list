@@ -1,4 +1,7 @@
 const logger = require('./logger')
+const jwt = require('jsonwebtoken')
+const { request } = require('express')
+
 
 const requestLogger = (req, res, next) => {
   logger.info('Method: ', req.method)
@@ -31,7 +34,22 @@ const tokenExtractor = (req, res, next) => {
   next()
 }
 
+const authMiddleware = (req, res, next) => {
+  const token = req.token || req.headers["x-access-token"] || req.headers['authorization']
+  if (!token) {
+    return res.status(401).send('missing token')
+  }
+  try {
+    const decodedToken = jwt.verify(req.token, process.env.SECRET)
+    req.user = decodedToken
+    next()
+  } catch(error) {
+    next(error)
+  }
+}
+
+
 
 module.exports = {
-  requestLogger, errorHandler, tokenExtractor
+  requestLogger, errorHandler, tokenExtractor, authMiddleware
 }

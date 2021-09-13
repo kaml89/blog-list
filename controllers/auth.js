@@ -9,7 +9,6 @@ module.exports = {
   login: async (request, response, next) => {
     try {
       const { username, password } = request.body
-      console.log(username)
       
       const user = await UserService.findByUsername(username)
 

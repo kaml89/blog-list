@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const BlogService = require('../services/blog.js')
 const UserService = require('../services/user.js')
+const middleware = require('../utils/middleware')
 const createResponseObject = require('../utils/createResponseObject')
 
 module.exports = {
@@ -13,13 +14,13 @@ module.exports = {
 
   createBlog: async (request, response, next) => {
     try {
-      const decodedToken = jwt.verify(request.token, process.env.SECRET)
-      if (!request.token || !decodedToken.id) {
-        return response.status(401).json({error: 'missing or invalid token'})
-      }
+      // const decodedToken = jwt.verify(request.token, process.env.SECRET)
+      // if (!request.token || !decodedToken.id) {
+      //   return response.status(401).json({error: 'missing or invalid token'})
+      // }
       const { title, author, url } = request.body
-      const user = await UserService.getUserById(decodedtoken.id)
-  
+      const user = await UserService.getUserById(request.user.id)
+      //console.log(user)
       const newBlog = await BlogService.create({
         title,
         author,
@@ -48,10 +49,10 @@ module.exports = {
 
   updateBlog: async (request, response, next) => {
     try {
-      const decodedToken = jwt.verify(request.token, process.env.SECRET)
-      if (!request.token || !decodedToken.id) {
-        return response.status(401).json({error: 'missing or invalid token'})
-      }
+      // const decodedToken = jwt.verify(request.token, process.env.SECRET)
+      // if (!request.token || !decodedToken.id) {
+      //   return response.status(401).json({error: 'missing or invalid token'})
+      // }
       
       const updatedBlog = await BlogService.incrementLikes(request.params.id)
       
@@ -80,7 +81,7 @@ module.exports = {
       }
       
       const updatedBlog = await BlogService.addComment(request.params.id, request.body.data)
-      response.json(updatedBlog.toJSON())
+      response.status(202).json(updatedBlog.toJSON())
   
       } catch(error) {
       next(error)
@@ -107,12 +108,10 @@ module.exports = {
       const deletedBlog = await BlogService.delete(request.params.id)
       await UserService.update(decodedToken.id, updatedUser)
   
-      response.json(deletedBlog.toJSON())
+      response.status(204).json(deletedBlog.toJSON())
   
     } catch(error) {
       next(error)
     }
   }
-
-
 }

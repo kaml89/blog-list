@@ -4,9 +4,9 @@ const middleware = require('../utils/middleware')
 
 blogRouter.get('/', middleware.authMiddleware, BlogController.getAllBlogs)
 blogRouter.post('/', middleware.authMiddleware, BlogController.createBlog)
-blogRouter.put('/:id', BlogController.updateBlog)
-blogRouter.get('/:id/comments', BlogController.getComments)
-blogRouter.put('/:id/comments', BlogController.addComment)
-blogRouter.delete('/:id', BlogController.deleteBlog)
+blogRouter.put('/:id', middleware.authMiddleware, BlogController.updateBlog)
+blogRouter.get('/:id/comments', middleware.authMiddleware, BlogController.getComments)
+blogRouter.put('/:id/comments', middleware.authMiddleware, BlogController.addComment)
+blogRouter.delete('/:id', middleware.authMiddleware, BlogController.deleteBlog)
 
 module.exports = blogRouter

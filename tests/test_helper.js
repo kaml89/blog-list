@@ -1,31 +1,24 @@
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const bcrypt = require('bcrypt')
+const mongoose = require('mongoose')
 
 const initialBlogs = [
   {
     title: 'blog1',
     author: 'kamil',
     url: 'sdf',
-    likes: 21
+    likes: 21,
+    _id: new mongoose.Types.ObjectId()
   }, 
   {
     title: 'blog2',
     author: 'dawid',
     url: 'jklhkjhkjh',
-    likes: 11
+    likes: 11,
+    _id: new mongoose.Types.ObjectId()
   }
 ]
-
-// const initialUsers = [
-//   {
-//     username: { type: String, unique: true },
-//     passwordHash: String,
-//     name: String,
-//     blogs: [{ type: Schema.Types.ObjectID, ref: 'Blog' }]
-//   }
-  
-// ]
 
 const createInitialUsers = async () => {
   const initialUsers = []
@@ -47,16 +40,28 @@ const createInitialUsers = async () => {
   return initialUsers
 }
 
-const blogsInDB = async () => {
+const getBlogsFromDB = async () => {
   const blogs = await Blog.find({})
   return blogs.map(blog => blog.toJSON())
 }
 
-const usersInDB = async () => {
+const getUsersFromDB = async () => {
   const users = await User.find({})
   return users.map(user => user.toJSON())
 }
 
+const nonExistingId = async () => {
+  const blog = new Blog(initialBlogs[0])
+  const newBlog = await blog.save()
+  const id = newBlog.id
+  await Blog.findByIdAndDelete(id)
+  return id
+}
+
+const addBlog = async (userId) => {
+  
+}
+
 module.exports = {
-  initialBlogs, blogsInDB, createInitialUsers, usersInDB
+  initialBlogs, getBlogsFromDB, createInitialUsers, getUsersFromDB, nonExistingId
 }
